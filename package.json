@@ -1,0 +1,29 @@
+{
+  "name": "git-song",
+  "version": "1.0.0",
+  "description": "Git hook for adding the currently playing song to a commit.",
+  "main": "index.js",
+  "bin": {
+    "git-song": "bin/git-song"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/remixz/git-song.git"
+  },
+  "author": "Zach Bruggeman <mail@bruggie.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/remixz/git-song/issues"
+  },
+  "homepage": "https://github.com/remixz/git-song#readme",
+  "dependencies": {
+    "applescript": "^1.0.0",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "standard": "^5.4.1"
+  }
+}

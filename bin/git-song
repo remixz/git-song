@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+'use strict'
+
+const fs = require('fs')
+const path = require('path')
+const argv = require('minimist')(process.argv.slice(2))
+const gitSong = require('../')
+
+if (argv['run-hook']) {
+  return fs.readFile(argv.file, (err, buf) => {
+    if (err) throw err
+
+    gitSong(buf.toString(), argv.player, (err, msg) => {
+      if (err) {
+        // this probably happens if the player wasn't open
+        // it'll end up opening it anyway (thx applescript!), but will still error out
+        // it'll just exit out gracefully instead so if the person doesn't have music playing
+        console.error('git-song: No song playing, or player isn\'t running. Continuing with commit.')
+        return process.exit(0)
+      }
+
+      fs.writeFile(argv.file, msg, err => {
+        if (err) throw err
+
+        return process.exit(0)
+      })
+    })
+  })
+}
+
+let hooksFolder = path.resolve(process.cwd(), '.git/hooks')
+
+fs.readdir(hooksFolder, (err, hooks) => {
+  if (err && err.code === 'ENOENT') {
+    console.error('ERROR: This folder doesn\'t appear to be a git repository. Did you `git init`?')
+    return process.exit(1)
+  }
+  if (err) throw err
+
+  if (hooks.indexOf('commit-msg') > -1 && !argv.force) {
+    console.error('ERROR: A commit-msg hook already exists in this repository. Please run this command again with --force to overwrite it.')
+    return process.exit(1)
+  }
+
+  let bashTemplate = `#!/usr/bin/env bash\n${__filename} --run-hook --file=$1 --player=${argv.player}`
+
+  fs.writeFile(hooksFolder + '/commit-msg', bashTemplate, { mode: 0o755 }, err => {
+    if (err) throw err
+
+    console.log(`Adding git-song hook with player ${argv.player}.`)
+    process.exit(0)
+  })
+})
